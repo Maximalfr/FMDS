@@ -1,13 +1,29 @@
+from typing import List
+
+from sqlalchemy import desc, func
 from sqlalchemy.orm import Session
 
 from app import models, schemas
 
 
 def get_content_by_filename(db: Session, filename: str) -> models.Content:
+    """
+    Retrieve a content entity by its filename
+    :param db: The session database object
+    :param filename: The content filename
+    :return: The Content model or None
+    """
     return db.query(models.Content).filter(models.Content.filename == filename).first()
 
 
-def create_content(db: Session, content: schemas.ContentCreate):
+def create_content(db: Session, content: schemas.ContentCreate) -> models.Content:
+    """
+    Create a content entity, the keywords if they don't exists and save it into the
+    database.
+    :param db: The session database object
+    :param content: The content schema to create
+    """
+
     # Retrieve existing keywords
     keywords = content.keywords
     db_keywords = (
@@ -30,8 +46,31 @@ def create_content(db: Session, content: schemas.ContentCreate):
     return db_content
 
 
-def increment_content_access(db: Session, content_id: int):
+def increment_content_access(db: Session, content_id: int) -> None:
+    """
+    Increment the access counter for a content entity.
+    :param db: The session database object
+    :param content_id: The content entity id
+    """
     db.query(models.Content).filter_by(id=content_id).update(
         {models.Content.count: models.Content.count + 1}
     )
     db.commit()
+
+
+def get_contents_by_keywords(db: Session, keywords: List[str]) -> List[models.Content]:
+    """
+    Retrieves content that matches at least one keyword.
+    The list is ordered by the number of matched keywords.
+    :param db: The session database object
+    :param keywords:
+    :return: The ordered list of matched contents
+    """
+    return (
+        db.query(models.Content)
+        .join(models.Content, models.Keyword.contents)
+        .filter(models.Keyword.name.in_(keywords))
+        .group_by(models.Content.id)
+        .order_by(desc(func.count()))
+        .all()
+    )

@@ -7,9 +7,14 @@ class _KeywordBase(BaseModel):
     name: str
 
 
+class KeywordRead(_KeywordBase):
+    class Config:
+        orm_mode = True
+
+
 class Keyword(_KeywordBase):
     id: str
-    contents: List["Content"] = []
+    contents: List["ContentRead"] = []
 
     class Config:
         orm_mode = True
@@ -17,24 +22,27 @@ class Keyword(_KeywordBase):
 
 class _ContentBase(BaseModel):
     filename: str = Field(..., example="02lag7ns7KtMWhCqcBdbjp.jpeg")
-    keywords: List[str] = Field([], example=["cat", "computer"])
-    count: int = Field(
-        0, example=154, description="Number of times this content has been accessed"
-    )
-
-
-class ContentRead(_ContentBase):
-    pass
+    keywords: List["str"] = Field([], example=["cat", "computer"])
 
 
 class ContentCreate(_ContentBase):
     filepath: str
 
 
+class ContentRead(_ContentBase):
+    keywords: List[KeywordRead] = []
+
+    class Config:
+        orm_mode = True
+
+
 class Content(_ContentBase):
     id: int
     filepath: str
     keywords: List[Keyword] = []
+    count: int = Field(
+        0, example=154, description="Number of times this content has been accessed"
+    )
 
     class Config:
         orm_mode = True

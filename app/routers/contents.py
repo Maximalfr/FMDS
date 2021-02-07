@@ -1,6 +1,7 @@
 import os
 from http import HTTPStatus
 from logging import getLogger
+from typing import List
 
 import magic
 from fastapi import (
@@ -10,6 +11,7 @@ from fastapi import (
     File,
     Form,
     HTTPException,
+    Query,
     UploadFile,
 )
 from fastapi.responses import FileResponse
@@ -104,3 +106,18 @@ async def upload_content(
         keywords=[k.name for k in content.keywords],
     )
     return content_read
+
+
+@router.get(
+    "/contents/",
+    tags=["contents"],
+    description="Get contents by matching keywords",
+    status_code=HTTPStatus.OK,
+    response_model=List[ContentRead],
+)
+async def search_content_by_keywords(
+    keywords: List[str] = Query(...),
+    db: Session = Depends(dependency=dependencies.get_db),
+):
+    db_keywords = repository.get_contents_by_keywords(db, keywords)
+    return db_keywords

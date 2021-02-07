@@ -1,7 +1,7 @@
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 
-from . import Base
+from app.database import Base
 
 association_table = Table(
     "contents_keywords",

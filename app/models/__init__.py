@@ -1,3 +1,1 @@
-from app.database import Base
-
-from .content import *
+from .content import Content, Keyword
