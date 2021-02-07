@@ -15,9 +15,9 @@ class Content(Base):
     __tablename__ = "contents"
 
     id = Column(Integer, primary_key=True, index=True)
-    filename = Column(String, unique=True, index=True)
-    filepath = Column(String, unique=True)
-    count = Column(Integer, default=0)
+    filename = Column(String(30), unique=True, index=True, nullable=False)
+    filepath = Column(String(200), unique=True, nullable=False)
+    count = Column(Integer, default=0, nullable=False)
 
     keywords = relationship(
         "Keyword", secondary=association_table, back_populates="contents"
@@ -28,7 +28,7 @@ class Keyword(Base):
     __tablename__ = "keywords"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True)
+    name = Column(String(20), unique=True, index=True, nullable=False)
 
     contents = relationship(
         "Content", secondary=association_table, back_populates="keywords"

@@ -12,6 +12,7 @@ setup(
     install_requires=[
         "aiofiles==0.6.0",
         "fastapi>=0.63.0,<0.64.0",
+        "mysqlclient>=2.0.3,<2.1.0"
         "python-dotenv==0.15.0",
         "python-magic>=0.4.18,<0.5.0",
         "python-multipart==0.0.5",
