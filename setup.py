@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 setup(
     name="FMDS",
     version="0.1",
-    packages=find_packages("app"),
+    packages=find_packages(),
     url="",
     license="MIT",
     author="william",
