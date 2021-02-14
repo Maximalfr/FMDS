@@ -25,6 +25,11 @@ class _ContentBase(BaseModel):
     keywords: List["str"] = Field([], example=["cat", "computer"])
 
 
+# Content patch doesn't inherit from _ContentBase because we wont update the file
+class ContentPatch(BaseModel):
+    keywords: List["str"] = Field([], example=["cat", "computer"])
+
+
 class ContentCreate(_ContentBase):
     filepath: str
 

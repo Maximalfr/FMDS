@@ -6,7 +6,8 @@ from typing import List
 import magic
 from app import dependencies
 from app.repositories import content as repository
-from app.schemas.content import ContentCreate, ContentRead
+from app import models
+from app.schemas.content import ContentCreate, ContentRead, ContentPatch
 from app.services.file import FileService
 from fastapi import (APIRouter, BackgroundTasks, Depends, File, Form,
                      HTTPException, Query, UploadFile)
@@ -32,21 +33,15 @@ async def get_content(
     count: bool = True,
     db: Session = Depends(dependency=dependencies.get_db),
 ):
-    not_found_error = HTTPException(
-        status_code=HTTPStatus.NOT_FOUND, detail="content not found"
-    )
 
-    content = repository.get_content_by_filename(db, filename)
-
-    if content is None:
-        raise not_found_error
-    elif not os.path.exists(content.filepath):
+    content = _get_content_or_not_found(filename, db)
+    if not os.path.exists(content.filepath):
         # Should not append
         LOGGER.error(
             f"get_content. The file %s is not found but the entity exists",
             content.filepath,
         )
-        raise not_found_error
+        _raise_content_not_found(filename)
 
     # increase asynchronously the counter
     if count:
@@ -120,11 +115,7 @@ async def delete_content_by_id(
     file_service: FileService = Depends(dependency=dependencies.get_file_service),
     db: Session = Depends(dependency=dependencies.get_db),
 ):
-    content = repository.get_content_by_filename(db, filename)
-    if content is None:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="content not found"
-        )
+    content = _get_content_or_not_found(filename, db)
 
     # It is preferable that the entity is first deleted from the database.
     db.delete(content)
@@ -138,3 +129,50 @@ async def delete_content_by_id(
             content.filepath,
             e,
         )
+
+
+@router.patch(
+    "/contents/{filename}",
+    tags=["contents"],
+    description="Update a content entity. For now, just the keywords",
+    status_code=HTTPStatus.OK,
+    response_model=ContentRead
+)
+async def update_content_by_id(
+    filename: str,
+    content_patch: ContentPatch,
+    db: Session = Depends(dependency=dependencies.get_db),
+):
+    if len(content_patch.keywords) == 0:
+        raise HTTPException(
+            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+            detail="an entity must have at least one keyword"
+        )
+    keywords = [k.replace(" ", "") for k in content_patch.keywords]
+    content = repository.update_content_keywords(db, filename, keywords)
+    if content is None:
+        _raise_content_not_found(filename)
+    return content
+
+
+def _get_content_or_not_found(filename: str, db: Session) -> models.Content:
+    """
+    Retrieve a content by its filename or raise a http not found exception
+    :param filename: the content filename
+    :return: the content model
+    """
+    content = repository.get_content_by_filename(db, filename)
+
+    if content is None:
+        _raise_content_not_found(filename)
+    return content
+
+
+def _raise_content_not_found(filename: str) -> None:
+    """
+    Raise a HTTPException with a not found status and a message
+    :param filename: the filename of the not found content
+    """
+    raise HTTPException(
+        status_code=HTTPStatus.NOT_FOUND, detail=f"content {filename} not found"
+    )
