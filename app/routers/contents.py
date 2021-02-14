@@ -100,12 +100,7 @@ async def upload_content(
 
     # Create the response
     content = repository.create_content(db, content_create)
-    content_read = ContentRead(
-        filename=content.filename,
-        # Keyword schema to strings list
-        keywords=[k.name for k in content.keywords],
-    )
-    return content_read
+    return content
 
 
 @router.get(
