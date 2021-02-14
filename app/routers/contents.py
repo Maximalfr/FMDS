@@ -4,23 +4,14 @@ from logging import getLogger
 from typing import List
 
 import magic
-from fastapi import (
-    APIRouter,
-    BackgroundTasks,
-    Depends,
-    File,
-    Form,
-    HTTPException,
-    Query,
-    UploadFile,
-)
-from fastapi.responses import FileResponse
-from sqlalchemy.orm import Session
-
 from app import dependencies
 from app.repositories import content as repository
 from app.schemas.content import ContentCreate, ContentRead
 from app.services.file import FileService
+from fastapi import (APIRouter, BackgroundTasks, Depends, File, Form,
+                     HTTPException, Query, UploadFile)
+from fastapi.responses import FileResponse
+from sqlalchemy.orm import Session
 
 LOGGER = getLogger("fastapi")
 VALID_MIMES_TYPES = ["image/gif", "image/jpeg", "image/png"]
@@ -116,3 +107,34 @@ async def search_content_by_keywords(
 ):
     db_keywords = repository.get_contents_by_keywords(db, keywords)
     return db_keywords
+
+
+@router.delete(
+    "/contents/{filename}",
+    tags=["contents"],
+    description="Remove a content entity",
+    status_code=HTTPStatus.NO_CONTENT,
+)
+async def delete_content_by_id(
+    filename: str,
+    file_service: FileService = Depends(dependency=dependencies.get_file_service),
+    db: Session = Depends(dependency=dependencies.get_db),
+):
+    content = repository.get_content_by_filename(db, filename)
+    if content is None:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="content not found"
+        )
+
+    # It is preferable that the entity is first deleted from the database.
+    db.delete(content)
+    db.commit()
+
+    try:
+        file_service.delete(content.filepath)
+    except OSError or FileNotFoundError as e:
+        LOGGER.error(
+            f"delete_content_by_id. The file %s couldn't de deleted. %s",
+            content.filepath,
+            e,
+        )

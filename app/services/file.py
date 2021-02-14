@@ -4,9 +4,8 @@ import shutil
 from typing import Tuple
 
 import timeflake
-from fastapi import UploadFile
-
 from app.config import Settings
+from fastapi import UploadFile
 
 
 class FileService:
@@ -49,3 +48,15 @@ class FileService:
             shutil.copyfileobj(file.file, fp)
 
         return filepath, filename
+
+    def delete(self, filepath: str) -> None:
+        # remove file
+        os.remove(filepath)
+
+        # Try to remove parent directories if their are empty
+        parent_path = os.path.split(filepath)[0]
+        while (
+            len(os.listdir(parent_path)) == 0 and parent_path != self._upload_directory
+        ):
+            os.rmdir(parent_path)
+            parent_path = os.path.split(parent_path)[0]
