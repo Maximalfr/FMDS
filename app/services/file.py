@@ -39,7 +39,9 @@ class FileService:
         filename = name + ext
 
         # Generate filepath
-        dirs = os.path.join(self._upload_directory, filename[:5])
+        # The first dir is a part of the timestamp
+        # The second is the last letter of the random part
+        dirs = os.path.join(self._upload_directory, filename[:5], name[-1])
         os.makedirs(dirs, exist_ok=True)
         filepath = os.path.join(dirs, filename)
 
