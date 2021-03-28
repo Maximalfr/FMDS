@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     """
 
     upload_directory: str = "/tmp/fmds/upload"
+    sqlalchemy_database_url: str
 
     class Config:
         env_file = os.getenv("FMDS_ENV_FILE", ".env")
