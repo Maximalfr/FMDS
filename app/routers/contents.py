@@ -14,6 +14,8 @@ from fastapi import (APIRouter, BackgroundTasks, Depends, File, Form,
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
+from app.utils.keywords import normalize_keywords, split_keywords_generator
+
 LOGGER = getLogger("fastapi")
 VALID_MIMES_TYPES = ["image/gif", "image/jpeg", "image/png"]
 
@@ -77,7 +79,7 @@ async def upload_content(
     if len(keywords) == 0:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Empty keywords")
 
-    keywords = keywords.replace(" ", "").split(",")
+    keywords = list(normalize_keywords(split_keywords_generator(keywords)))
     filepath, filename = file_service.push(file, mimetype=mime_type)
 
     content_create = ContentCreate(
@@ -100,7 +102,7 @@ async def search_content_by_keywords(
     keywords: List[str] = Query(...),
     db: Session = Depends(dependency=dependencies.get_db),
 ):
-    db_keywords = repository.get_contents_by_keywords(db, keywords)
+    db_keywords = repository.get_contents_by_keywords(db, normalize_keywords(keywords))
     return db_keywords
 
 
@@ -148,7 +150,7 @@ async def update_content_by_id(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
             detail="an entity must have at least one keyword"
         )
-    keywords = [k.replace(" ", "") for k in content_patch.keywords]
+    keywords = normalize_keywords(content_patch.keywords)
     content = repository.update_content_keywords(db, filename, keywords)
     if content is None:
         _raise_content_not_found(filename)

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Iterator
 
 from sqlalchemy import desc, func
 from sqlalchemy.orm import Session
@@ -59,7 +59,9 @@ def increment_content_access(db: Session, content_id: int) -> None:
     db.commit()
 
 
-def get_contents_by_keywords(db: Session, keywords: List[str]) -> List[models.Content]:
+def get_contents_by_keywords(
+        db: Session, keywords: [Iterator[str], List[str]]
+) -> List[models.Content]:
     """
     Retrieves content that matches at least one keyword.
     The list is ordered by the number of matched keywords.
@@ -77,7 +79,9 @@ def get_contents_by_keywords(db: Session, keywords: List[str]) -> List[models.Co
     )
 
 
-def update_content_keywords(db: Session, filename: str, keywords: List[str]) -> [models.Content, None]:
+def update_content_keywords(
+        db: Session, filename: str, keywords: [Iterator[str], List[str]]
+) -> [models.Content, None]:
     """
     Update a content entity, create the keywords if they don't exists and save it into the
     database.
