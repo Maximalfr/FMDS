@@ -17,7 +17,7 @@ def normalize_keywords(keywords: [Iterator[str], List[str]]) -> Iterator[str]:
     )
 
 
-def split_keywords_generator(keywords_string: str) -> Generator[str, str, str]:
+def split_keywords_generator(keywords_string: str) -> Generator[str, str, None]:
     """
     Create a generator that splits a string given multiple separators and yield only unique value.
     :param keywords_string: The keywords to split
@@ -35,5 +35,6 @@ def split_keywords_generator(keywords_string: str) -> Generator[str, str, str]:
                     seen.add(word)
                     yield word
             last = min(i + 1, size)  # Avoid an OOB
-    if last != size:
-        return keywords_string[last: size]
+        elif i + 1 == size:  # Return the last word if not a separator
+            yield keywords_string[last: size]
+
