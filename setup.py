@@ -12,10 +12,12 @@ setup(
     install_requires=[
         "aiofiles==0.6.0",
         "fastapi>=0.63.0,<0.64.0",
-        "mysqlclient>=2.0.3,<2.1.0"
+        "mysqlclient>=2.0.3,<2.1.0",
+        "passlib>=1.7.4,<1.8.0",
         "python-dotenv==0.15.0",
         "python-magic>=0.4.18,<0.5.0",
         "python-multipart==0.0.5",
+        "python-jose[cryptography]>=3.2.0,<4.0.0",
         "sqlalchemy>=1.3.23,<1.4.0",
         "timeflake>=0.3.3,<0.4.0",
         "uvicorn[standard]>=0.13.0,<0.14.0",
