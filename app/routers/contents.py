@@ -3,16 +3,15 @@ from logging import getLogger
 from typing import List
 
 import magic
-from app import dependencies
-from app.repositories import content as repository
-from app import models
-from app.schemas.content import ContentCreate, ContentRead, ContentPatch
-from app.services.file import FileService
 from fastapi import (APIRouter, BackgroundTasks, Depends, File, Form,
                      HTTPException, Query, UploadFile, status)
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
+from app import dependencies, models
+from app.repositories import content as repository
+from app.schemas.content import ContentCreate, ContentPatch, ContentRead
+from app.services.file import FileService
 from app.utils.keywords import normalize_keywords, split_keywords_generator
 
 LOGGER = getLogger("fastapi")
@@ -76,7 +75,9 @@ async def upload_content(
 
     # Keyword verification
     if len(keywords) == 0:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Empty keywords")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Empty keywords"
+        )
 
     keywords = list(normalize_keywords(split_keywords_generator(keywords)))
     filepath, filename = file_service.push(file, mimetype=mime_type)
@@ -137,7 +138,7 @@ async def delete_content_by_id(
     tags=["contents"],
     description="Update a content entity. For now, just the keywords",
     status_code=status.HTTP_200_OK,
-    response_model=ContentRead
+    response_model=ContentRead,
 )
 async def update_content_by_id(
     filename: str,
@@ -147,7 +148,7 @@ async def update_content_by_id(
     if len(content_patch.keywords) == 0:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="an entity must have at least one keyword"
+            detail="an entity must have at least one keyword",
         )
     keywords = normalize_keywords(content_patch.keywords)
     content = repository.update_content_keywords(db, filename, keywords)

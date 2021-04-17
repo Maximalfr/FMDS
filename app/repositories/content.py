@@ -1,4 +1,4 @@
-from typing import List, Iterator
+from typing import Iterator, List
 
 from sqlalchemy import desc, func
 from sqlalchemy.orm import Session
@@ -60,7 +60,7 @@ def increment_content_access(db: Session, content_id: int) -> None:
 
 
 def get_contents_by_keywords(
-        db: Session, keywords: [Iterator[str], List[str]]
+    db: Session, keywords: [Iterator[str], List[str]]
 ) -> List[models.Content]:
     """
     Retrieves content that matches at least one keyword.
@@ -80,7 +80,7 @@ def get_contents_by_keywords(
 
 
 def update_content_keywords(
-        db: Session, filename: str, keywords: [Iterator[str], List[str]]
+    db: Session, filename: str, keywords: [Iterator[str], List[str]]
 ) -> [models.Content, None]:
     """
     Update a content entity, create the keywords if they don't exists and save it into the

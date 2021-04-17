@@ -1,6 +1,5 @@
 import unicodedata
-
-from typing import Iterator, List, Generator
+from typing import Generator, Iterator, List
 
 
 def normalize_keywords(keywords: [Iterator[str], List[str]]) -> Iterator[str]:
@@ -11,9 +10,9 @@ def normalize_keywords(keywords: [Iterator[str], List[str]]) -> Iterator[str]:
     """
     return map(
         lambda k: unicodedata.normalize("NFD", k.lower().strip())
-                             .encode(encoding="ascii", errors="ignore")
-                             .decode(encoding="utf-8"),
-        keywords
+        .encode(encoding="ascii", errors="ignore")
+        .decode(encoding="utf-8"),
+        keywords,
     )
 
 
@@ -36,5 +35,4 @@ def split_keywords_generator(keywords_string: str) -> Generator[str, str, None]:
                     yield word
             last = min(i + 1, size)  # Avoid an OOB
         elif i + 1 == size:  # Return the last word if not a separator
-            yield keywords_string[last: size]
-
+            yield keywords_string[last:size]

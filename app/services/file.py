@@ -4,8 +4,9 @@ import shutil
 from typing import Tuple
 
 import timeflake
-from app.config import Settings
 from fastapi import UploadFile
+
+from app.config import Settings
 
 
 class FileService:

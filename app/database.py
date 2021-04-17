@@ -6,9 +6,7 @@ from app import config
 
 settings = config.Settings()
 
-engine = create_engine(
-    settings.sqlalchemy_database_url
-)
+engine = create_engine(settings.sqlalchemy_database_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

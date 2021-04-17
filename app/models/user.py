@@ -1,4 +1,4 @@
-from sqlalchemy import Column, CHAR, Integer, String
+from sqlalchemy import CHAR, Column, Integer, String
 
 from app.database import Base
 
@@ -9,4 +9,3 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(30), unique=True, index=True, nullable=False)
     hashed_password = Column(CHAR(60), nullable=False)
-

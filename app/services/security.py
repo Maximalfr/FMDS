@@ -1,16 +1,18 @@
-from app.config import Settings
-from app.models.user import User
-
 from datetime import datetime, timedelta
+
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from passlib.context import CryptContext
+
+from app.config import Settings
+from app.models.user import User
 
 ALGORITHM = "HS256"
 
 
 class SecurityService:
     """Service that handle all security aspect for a user"""
+
     def __init__(self, settings: Settings):
         """
         Construct the security service
@@ -37,6 +39,7 @@ class SecurityService:
         """
         to_encode = {
             "username": user.username,
-            "exp": datetime.utcnow() + timedelta(minutes=self.settings.access_token_expire_minutes)
+            "exp": datetime.utcnow()
+            + timedelta(minutes=self.settings.access_token_expire_minutes),
         }
         return jwt.encode(to_encode, self.settings.secret_key, algorithm=ALGORITHM)
