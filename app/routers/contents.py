@@ -1,5 +1,4 @@
 import os
-from http import HTTPStatus
 from logging import getLogger
 from typing import List
 
@@ -10,7 +9,7 @@ from app import models
 from app.schemas.content import ContentCreate, ContentRead, ContentPatch
 from app.services.file import FileService
 from fastapi import (APIRouter, BackgroundTasks, Depends, File, Form,
-                     HTTPException, Query, UploadFile)
+                     HTTPException, Query, UploadFile, status)
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
@@ -26,7 +25,7 @@ router = APIRouter()
     "/contents/{filename}",
     tags=["contents"],
     description="Get a content entity as binary",
-    status_code=HTTPStatus.OK,
+    status_code=status.HTTP_200_OK,
     response_class=FileResponse,
 )
 async def get_content(
@@ -56,7 +55,7 @@ async def get_content(
     "/contents",
     tags=["contents"],
     description="Create a content entity",
-    status_code=HTTPStatus.CREATED,
+    status_code=status.HTTP_201_CREATED,
     response_model=ContentRead,
 )
 async def upload_content(
@@ -71,13 +70,13 @@ async def upload_content(
     await file.seek(0)
     if mime_type not in VALID_MIMES_TYPES:
         raise HTTPException(
-            status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             detail=f"The media type '{mime_type}' is not supported",
         )
 
     # Keyword verification
     if len(keywords) == 0:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Empty keywords")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Empty keywords")
 
     keywords = list(normalize_keywords(split_keywords_generator(keywords)))
     filepath, filename = file_service.push(file, mimetype=mime_type)
@@ -95,7 +94,7 @@ async def upload_content(
     "/contents/",
     tags=["contents"],
     description="Get contents by matching keywords",
-    status_code=HTTPStatus.OK,
+    status_code=status.HTTP_200_OK,
     response_model=List[ContentRead],
 )
 async def search_content_by_keywords(
@@ -110,7 +109,7 @@ async def search_content_by_keywords(
     "/contents/{filename}",
     tags=["contents"],
     description="Remove a content entity",
-    status_code=HTTPStatus.NO_CONTENT,
+    status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_content_by_id(
     filename: str,
@@ -137,7 +136,7 @@ async def delete_content_by_id(
     "/contents/{filename}",
     tags=["contents"],
     description="Update a content entity. For now, just the keywords",
-    status_code=HTTPStatus.OK,
+    status_code=status.HTTP_200_OK,
     response_model=ContentRead
 )
 async def update_content_by_id(
@@ -147,7 +146,7 @@ async def update_content_by_id(
 ):
     if len(content_patch.keywords) == 0:
         raise HTTPException(
-            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="an entity must have at least one keyword"
         )
     keywords = normalize_keywords(content_patch.keywords)
@@ -176,5 +175,5 @@ def _raise_content_not_found(filename: str) -> None:
     :param filename: the filename of the not found content
     """
     raise HTTPException(
-        status_code=HTTPStatus.NOT_FOUND, detail=f"content {filename} not found"
+        status_code=status.HTTP_404_NOT_FOUND, detail=f"content {filename} not found"
     )
