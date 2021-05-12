@@ -25,3 +25,8 @@ def get_db():
 @lru_cache
 def get_security_service() -> services.SecurityService:
     return services.SecurityService(get_settings())
+
+
+@lru_cache
+def get_jwt_bearer_service() -> services.JWTBearerService:
+    return services.JWTBearerService(next(get_db()), get_security_service())

@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app import dependencies, models
+from app.models import User
 from app.repositories import content as repository
 from app.schemas.content import ContentCreate, ContentPatch, ContentRead
 from app.services.file import FileService
@@ -62,6 +63,7 @@ async def upload_content(
     keywords: str = Form(...),
     file_service: FileService = Depends(dependency=dependencies.get_file_service),
     db: Session = Depends(dependency=dependencies.get_db),
+    _: User = Depends(dependency=dependencies.get_jwt_bearer_service()),
 ):
     # File verification
     # Mime type
@@ -116,6 +118,7 @@ async def delete_content_by_id(
     filename: str,
     file_service: FileService = Depends(dependency=dependencies.get_file_service),
     db: Session = Depends(dependency=dependencies.get_db),
+    _: User = Depends(dependency=dependencies.get_jwt_bearer_service()),
 ):
     content = _get_content_or_not_found(filename, db)
 
@@ -144,6 +147,7 @@ async def update_content_by_id(
     filename: str,
     content_patch: ContentPatch,
     db: Session = Depends(dependency=dependencies.get_db),
+    _: User = Depends(dependency=dependencies.get_jwt_bearer_service()),
 ):
     if len(content_patch.keywords) == 0:
         raise HTTPException(

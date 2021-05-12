@@ -1,2 +1,2 @@
 from .file import FileService
-from .security import SecurityService
+from .security import JWTBearerService, SecurityService
